@@ -10,14 +10,14 @@ myheading1='Predicting Mortgage Loan Approval'
 image1='assets/rocauc.html'
 tabtitle = 'Loan Prediction'
 sourceurl = 'https://datahack.analyticsvidhya.com/contest/practice-problem-loan-prediction-iii/'
-githublink = 'https://github.com/plotly-dash-apps/503-log-reg-loans-simple'
+githublink = 'https://github.com/farkasdilemma/503-log-reg-loans-simple'
 
 ########### open the json file ######
 with open('assets/rocauc.json', 'r') as f:
     fig=json.load(f)
 
 ########### open the pickle file ######
-filename = open('analysis/loan_approval_logistic_model.pkl', 'rb')
+filename = open('analysis/loan_approval_logistic_model_new.pkl', 'rb')
 unpickled_model = pickle.load(filename)
 filename.close()
 
@@ -39,6 +39,8 @@ app.layout = html.Div(children=[
                 html.H3("Features"),
                 html.Div('Credit History:'),
                 dcc.Input(id='Credit_History', value=1, type='number', min=0, max=1, step=1),
+                html.Div('Married (1 for yes, 0 for no):'),
+                dcc.Input(id='married', value=1, type='number', min=0, max=1, step=1),
                 html.Div('Loan Amount (in thousands):'),
                 dcc.Input(id='LoanAmount', value=130, type='number', min=10, max=800, step=10),
                 html.Div('Term (in months)'),
@@ -79,14 +81,15 @@ app.layout = html.Div(children=[
      Output(component_id='DenialProb', component_property='children'),
     ],
     [Input(component_id='Credit_History', component_property='value'),
+     Input(component_id='married', component_property='value'),
      Input(component_id='LoanAmount', component_property='value'),
      Input(component_id='Loan_Amount_Term', component_property='value'),
      Input(component_id='ApplicantIncome', component_property='value'),
      Input(component_id='Threshold', component_property='value')
     ])
-def prediction_function(Credit_History, LoanAmount, Loan_Amount_Term, ApplicantIncome, Threshold):
+def prediction_function(Credit_History, LoanAmount, Loan_Amount_Term, ApplicantIncome, married, Threshold):
     try:
-        data = [[Credit_History, LoanAmount, Loan_Amount_Term, ApplicantIncome]]
+        data = [[Credit_History, LoanAmount, Loan_Amount_Term, ApplicantIncome,married]]
         rawprob=100*unpickled_model.predict_proba(data)[0][1]
         func = lambda y: 'Approved' if int(rawprob)>Threshold else 'Denied'
         formatted_y = func(rawprob)
